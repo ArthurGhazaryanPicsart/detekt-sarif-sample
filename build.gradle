@@ -19,7 +19,7 @@ subprojects {
     apply plugin: 'io.gitlab.arturbosch.detekt'
 
     detekt {
-        basePath = projectDir
+        basePath = rootProject.projectDir
     }
 }
 
