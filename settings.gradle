@@ -8,3 +8,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "detekt-sarif"
 include ':app'
+include ':library-module'
