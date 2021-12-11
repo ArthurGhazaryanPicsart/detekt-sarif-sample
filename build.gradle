@@ -1,3 +1,6 @@
+import io.gitlab.arturbosch.detekt.Detekt
+import io.gitlab.arturbosch.detekt.DetektPlugin
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     repositories {
@@ -12,6 +15,37 @@ buildscript {
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+    }
+}
+
+task reportMerge(type: io.gitlab.arturbosch.detekt.report.ReportMergeTask) {
+    output = project.layout.buildDirectory.file("reports/detekt/merge.sarif")
+    // or "reports/detekt/merge.sarif"
+}
+
+subprojects {
+    apply plugin: 'io.gitlab.arturbosch.detekt'
+
+    detekt {
+        ignoreFailures = true
+        basePath = rootProject.projectDir
+    }
+
+    tasks.withType(Detekt).configureEach {
+        reports {
+            sarif.required.set(true)
+            sarif.destination = file("build/reports/detekt/detektSarif.sarif")
+        }
+    }
+
+    plugins.withType(DetektPlugin) {
+        tasks.withType(Detekt) { detektTask ->
+            finalizedBy(reportMerge)
+
+            reportMerge.configure { mergeTask ->
+                mergeTask.input.from(detektTask.project.layout.buildDirectory.file("reports/detekt/detektSarif.sarif")) // or detektTask.sarifReportFile
+            }
+        }
     }
 }
 
